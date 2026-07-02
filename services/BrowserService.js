@@ -2,42 +2,39 @@ import { chromium, firefox, webkit } from "playwright";
 
 class BrowserService {
 
-    async fillForm(sheet) {
+    async openBrowser(browserName, url) {
 
-        const browser = await chromium.launch({
-            headless: false
-        });
-        const page = await browser.newPage();
-        await page.goto("https://rpachallenge.com");
-        await page.getByRole("button", { name: "Start" }).click();
-        for (let i = 2; i <= sheet.rowCount; i++) {
+        let browser;
 
-            const row = sheet.getRow(i);
-            if (!row.hasValues) {
-                continue;
-            }
+        switch (browserName.toLowerCase()) {
 
-            await page.fill('[ng-reflect-name="labelFirstName"]', String(row.getCell(1).value));
-            await page.fill('[ng-reflect-name="labelLastName"]', String(row.getCell(2).value));
-            await page.fill('[ng-reflect-name="labelCompanyName"]', String(row.getCell(3).value));
-            await page.fill('[ng-reflect-name="labelRole"]', String(row.getCell(4).value));
+            case "chromium":
+                browser = await chromium.launch({
+                    headless: false
+                });
+                break;
 
-            await page.fill('[ng-reflect-name="labelAddress"]', String(row.getCell(5).value));
+            case "firefox":
+                browser = await firefox.launch({
+                    headless: false
+                });
+                break;
 
-            await page.fill('[ng-reflect-name="labelEmail"]', String(row.getCell(6).value));
-            await page.fill('[ng-reflect-name="labelPhone"]', String(row.getCell(7).value));
-            await page.screenshot({
-                path: `./screenshots/data${i - 1}.png`,
-                fullPage: true
-            });
-            console.log(`data-> ${i - 1}`);
-            await page.locator('input[value="Submit"]').click();
+            case "webkit":
+                browser = await webkit.launch({
+                    headless: false
+                });
+                break;
+
+            default:
+                throw new Error(`Unsupported browser: ${browserName}`);
         }
-        await page.waitForTimeout(2000);
-        await browser.close();
-        console.log("done");
-    }
 
+        const page = await browser.newPage();
+        await page.goto(url);
+
+        return { browser, page };
+    }
 }
 
 export default BrowserService;
