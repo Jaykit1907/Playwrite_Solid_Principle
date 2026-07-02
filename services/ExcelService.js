@@ -7,7 +7,6 @@ class ExcelService {
         const workbook = new ExcelJS.Workbook();
 
         await workbook.xlsx.readFile("./challenge.xlsx");
-
         return workbook.getWorksheet("Sheet1");
     }
 
